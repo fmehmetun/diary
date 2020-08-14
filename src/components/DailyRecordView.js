@@ -13,6 +13,30 @@ import { data_filename_absolute } from '../consts.js';
 import { sortList_createdAt } from '../utils.js';
 
 DailyRecordView = (props) => {
+	onDelete = () => {
+		// Read file
+		FileSystem.readAsStringAsync(data_filename_absolute)
+		.then(resp => {
+			let list = JSON.parse(resp);
+
+			// Delete this item from list
+			list = list.filter(i => i.id != props.item.id);
+
+			// Write to file
+			FileSystem.writeAsStringAsync(data_filename_absolute, JSON.stringify(list))
+			.then(resp => {
+				Toast.show("Successfully deleted the record!");
+				props.navigation.pop();
+			})
+			.catch(err => {
+				console.error(err);
+			});
+		})
+		.catch(err => {
+			console.error(err);
+		})
+	};
+
 	return(
 		<View style={styles.container}>
 			<View style={styles.content}>
@@ -54,6 +78,41 @@ DailyRecordView = (props) => {
 						importantForAutofill="no"
 						multiline={true}
 						scrollEnabled={true}
+					/>
+				</View>
+
+				<View style={styles.buttonsContainer}>
+					{/* Edit button */}
+					<Button
+						title="Edit"
+						onPress={() => {
+							props.navigation.replace(
+								"CreateDailyRecord",
+								{
+									edit: true,
+									item: props.item
+								}
+							)
+						}}
+						icon={{
+							name: "edit",
+							type: "feather",
+							color: "white",
+						}}
+					/>
+					{/* Delete button */}
+					<Button
+						title="Delete"
+						onLongPress={onDelete}
+						onPress={() => {
+							Toast.show("Hold button to delete the record!");
+						}}
+						buttonStyle={{backgroundColor: "red"}}
+						icon={{
+							name: "trash",
+							type: "feather",
+							color: "white",
+						}}
 					/>
 				</View>
 			</View>

@@ -16,14 +16,14 @@ import { data_filename_absolute } from '../consts.js';
 import { sortList_createdAt } from '../utils.js';
 
 CreateDailyRecord = (props) => {
-	const [title, setTitle] = useState("");
-	const [body, setBody] = useState("");
+	const [title, setTitle] = useState(props.edit ? props.item.title : "");
+	const [body, setBody] = useState(props.edit ? props.item.body : "");
 
 	// Date
-	const [date, setDate] = useState(moment().format('L'));
+	const [date, setDate] = useState(props.edit ? props.item.date : moment().format('L'));
 
 	onCreate = () => {
-		if(title === "" || body === ""){
+		if(props.edit && (title === "" || body === "")){
 			Toast.show("Invalid inputs!");
 			return;
 		}
@@ -34,31 +34,45 @@ CreateDailyRecord = (props) => {
 			let list = JSON.parse(resp);
 
 			let newId;
-			if(list.length > 0){
-				newId = list.sort(
-					(a, b) => (
-						(a.id > b.id) ? -1 :
-						(a.id < b.id) ? 1 : 0
-					)
-				)[0].id + 1;
+			let createdAt;
+			// In case of edit, just update corresponding values
+			if(props.edit){
+				list = list.filter(i => i.id != props.item.id);
+				newId = props.item.id;
+				createdAt = props.item.createdAt;
 			}else{
-				newId = 1;
+				// Find new id
+				if(list.length > 0){
+					newId = list.sort(
+						(a, b) => (
+							(a.id > b.id) ? -1 :
+							(a.id < b.id) ? 1 : 0
+						)
+					)[0].id + 1;
+				}else{
+					newId = 1;
+				}
+				createdAt = moment.now();
 			}
 
-			// Push the object and sort the list
+			// Push the object
 			list.push({
 				id: newId,
 				date: date,
 				title: title,
 				body: body,
-				createdAt: moment.now()
+				createdAt: createdAt
 			});
 
 			// Write to file
 			FileSystem.writeAsStringAsync(data_filename_absolute, JSON.stringify(list))
 			.then(resp => {
-				Toast.show("Successfully created the record!");
-				props.navigation.popTo("Home", {refresh: true});
+				if(props.edit){
+					Toast.show("Successfully updated the record!");
+				}else{
+					Toast.show("Successfully created the record!");
+				}
+				props.navigation.pop();
 			})
 			.catch(err => {
 				console.error(err);
@@ -115,20 +129,39 @@ CreateDailyRecord = (props) => {
 				</View>
 
 				<View style={styles.buttonsContainer}>
-					{/* Confirm button */}
-					<Button
-						title="Create"
-						onLongPress={onCreate}
-						onPress={() => {
-							Toast.show("Hold button to create the record!");
-						}}
-						buttonStyle={{backgroundColor: "green"}}
-						icon={{
-							name: "plus-square",
-							type: "feather",
-							color: "white",
-						}}
-					/>
+					{
+						(props.edit) ? (
+							// Update button
+							<Button
+								title="Update"
+								onLongPress={onCreate}
+								onPress={() => {
+									Toast.show("Hold button to update the record!");
+								}}
+								buttonStyle={{backgroundColor: "green"}}
+								icon={{
+									name: "refresh-ccw",
+									type: "feather",
+									color: "white",
+								}}
+							/>
+						) : (
+							// Confirm button
+							<Button
+								title="Create"
+								onLongPress={onCreate}
+								onPress={() => {
+									Toast.show("Hold button to create the record!");
+								}}
+								buttonStyle={{backgroundColor: "green"}}
+								icon={{
+									name: "plus-square",
+									type: "feather",
+									color: "white",
+								}}
+							/>
+						)
+					}
 				</View>
 			</View>
 		</View>

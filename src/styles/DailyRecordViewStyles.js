@@ -77,7 +77,7 @@ export default StyleSheet.create({
 	buttonsContainer: {
 		flex: 1,
 		flexDirection: "row",
-		justifyContent: "center",
+		justifyContent: "space-evenly",
 		alignContent: "center",
 		alignItems: "stretch",
 		marginHorizontal: "3%",
