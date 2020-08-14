@@ -1,21 +1,55 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { AppRegistry, StatusBar } from 'react-native';
+import { Router, Stack, Scene } from "react-native-router-flux";
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+import Home from './src/components/Home';
+import DailyRecordView from './src/components/DailyRecordView';
+import AddDailyRecord from './src/components/AddDailyRecord';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App = () => {
+	return <>
+		<StatusBar backgroundColor="#24292e" />
+		<Router>
+			<Stack key="Root">
+				<Scene
+					hideNavBar
+					key="Home"
+					component={Home}
+					initial={true}
+				/>
+				<Scene
+					key="AddDailyRecord"
+					component={AddDailyRecord}
+					navigationBarStyle={{
+						backgroundColor: "#14191e"
+					}}
+					navBarButtonColor="white"
+					title="Add record"
+					titleStyle={{
+						textAlign: "center",
+						fontSize: 25,
+						color: "white"
+					}}
+					back={true}
+				/>
+				<Scene
+					key="DailyRecordView"
+					component={DailyRecordView}
+					navigationBarStyle={{
+						backgroundColor: "#14191e"
+					}}
+					navBarButtonColor="white"
+					title="View record"
+					titleStyle={{
+						textAlign: "center",
+						fontSize: 25,
+						color: "white"
+					}}
+					back={true}
+				/>
+			</Stack>
+		</Router>
+	</>
+};
+
+AppRegistry.registerComponent("diary", () => App);
