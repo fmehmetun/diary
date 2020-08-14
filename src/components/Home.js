@@ -13,11 +13,14 @@ moment.locale("en-gb");
 // Project
 import LoadingScreen from './LoadingScreen';
 import { data_filename_absolute } from '../consts.js';
+import { sortList_createdAt } from '../utils.js';
 
 Home = (props) => {
-	const [loading, setLoading] = useState(false);
-	const [refreshing, setRefreshing] = useState(false);
+	if(props.refresh){
+		onRefresh();
+	}
 
+	const [loading, setLoading] = useState(false);
 	const [list, setList] = useState([]);
 	// Check if record for today exists
 	useEffect(() => {
@@ -31,37 +34,9 @@ Home = (props) => {
 
 	componentDidMount = () => {
 		setLoading(true);
-		FileSystem.writeAsStringAsync(data_filename_absolute, `
-			[
-				{
-					"date": "13/08/2020",
-					"title": "Başlık",
-					"body": "ilginç bir başlık..."
-				},
-				{
-					"date": "12/08/2020",
-					"title": "Başlık",
-					"body": "ilginç bir başlık..."
-				},
-				{
-					"date": "11/08/2020",
-					"title": "Başlık",
-					"body": "ilginç bir başlık..."
-				},
-				{
-					"date": "10/08/2020",
-					"title": "Başlık",
-					"body": "ilginç bir başlık..."
-				},
-				{
-					"date": "09/08/2020",
-					"title": "Başlık",
-					"body": "ilginç bir başlık..."
-				}
-			]
-		`);
 		initiateFile();
 		readFile();
+		setLoading(false);
 	}
 	useEffect(componentDidMount, []);
 
@@ -90,19 +65,19 @@ Home = (props) => {
 		// Read file
 		FileSystem.readAsStringAsync(data_filename_absolute)
 		.then(resp => {
-			setList(JSON.parse(resp));
+			// Set the list that contains all daily records
+			setList(sortList_createdAt(JSON.parse(resp)));
 			setLoading(false);
 		})
 		.catch(err => {
 			console.error(err);
+			setLoading(false);
 		})
 	}
 
 	onRefresh = () => {
-		setRefreshing(true);
 		readFile();
-		setRefreshing(false);
-	}
+	};
 
 	if(loading){
 		return <LoadingScreen />;
@@ -125,7 +100,7 @@ Home = (props) => {
 				<SafeAreaView style={styles.list}>
 					<ScrollView
 						refreshControl={
-							<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#1890ff"]} />
+							<RefreshControl refreshing={loading} onRefresh={onRefresh} colors={["#1890ff"]} />
 						}
 					>
 						{/* Add Item */}
@@ -138,20 +113,14 @@ Home = (props) => {
 						}
 						{/* Normal Items */}
 						{
-							(list.length === 0) ? (
-								<Text style={{color:"white", textAlign:"center"}}>
-									Nothing to see here!
-								</Text>
-							) : (
-								list.map((item, i) => (
-									<HomeListItem
-										key={i}
-										index={i}
-										item={item}
-										navigation={props.navigation}
-									/>
-								))
-							)
+							list.map((item, i) => (
+								<HomeListItem
+									key={i}
+									index={i}
+									item={item}
+									navigation={props.navigation}
+								/>
+							))
 						}
 					</ScrollView>
 				</SafeAreaView>
@@ -168,12 +137,12 @@ HomeListItem = (props) => {
 			key={props.index}
 			style={styles.listItem}
 			onPress={() => {
-				// props.navigation.push(
-				// 	"DailyRecordView",
-				// 	{
-				// 		item: props.item
-				// 	}
-				// );
+				props.navigation.push(
+					"DailyRecordView",
+					{
+						item: props.item
+					}
+				);
 			}}
 
 			// Book Icon
@@ -206,7 +175,7 @@ HomeAddItem = (props) => {
 			key={props.index}
 			style={styles.listItem}
 			onPress={() => {
-				props.navigation.push("AddDailyRecord");
+				props.navigation.push("CreateDailyRecord");
 			}}
 
 			// Add Icon

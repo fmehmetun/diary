@@ -4,7 +4,7 @@ import { Router, Stack, Scene } from "react-native-router-flux";
 
 import Home from './src/components/Home';
 import DailyRecordView from './src/components/DailyRecordView';
-import AddDailyRecord from './src/components/AddDailyRecord';
+import CreateDailyRecord from './src/components/CreateDailyRecord';
 
 export default App = () => {
 	return <>
@@ -18,13 +18,13 @@ export default App = () => {
 					initial={true}
 				/>
 				<Scene
-					key="AddDailyRecord"
-					component={AddDailyRecord}
+					key="CreateDailyRecord"
+					component={CreateDailyRecord}
 					navigationBarStyle={{
 						backgroundColor: "#14191e"
 					}}
 					navBarButtonColor="white"
-					title="Add record"
+					title="Create record"
 					titleStyle={{
 						textAlign: "center",
 						fontSize: 25,
